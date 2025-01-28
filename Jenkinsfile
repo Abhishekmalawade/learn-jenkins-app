@@ -20,7 +20,7 @@ pipeline {
                 '''
             }
         }
-        stage(Test){
+        stage('Test'){
             steps{
                 echo 'This is teting'
             }
