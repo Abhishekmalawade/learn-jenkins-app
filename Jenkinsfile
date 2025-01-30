@@ -45,11 +45,13 @@ pipeline {
             }
             steps {
                 sh '''
-                apk add --no-cache zip
-                npm install netlify-cli
-                node_modules/.bin/netlify --version
-                zip -r build.zip build
-                '''
+                    echo "Installing zip..."
+                    su -c "apk add --no-cache zip"
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    zip -r build.zip build
+                    '''
+
                 archiveArtifacts artifacts: 'build.zip', fingerprint: true
             }
         }
