@@ -16,6 +16,7 @@ pipeline {
                 npm --version
                 npm ci
                 npm run build
+                zip -r build.zip build
                 ls -la
                 '''
             }
