@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-            environment{
-                NETLIFY_SITE_ID = '47a26b36-ead5-420f-ba88-cbf1f44a9426'
-            }
-
     stages {
         stage('Build') {
             agent {
@@ -43,18 +39,20 @@ pipeline {
         stage('Deploy') {
             agent {
                 docker {
-                    image 'node:18-alpine'
-                    args '--user root'
+                    image 'node:18-alpine'  // ✅ Keep default node user (NO root)
                     reuseNode true
                 }
             }
             steps {
                 sh '''
-                    echo "Installing zip..."
-                    apk add --no-cache zip
+                    echo "Installing zip in home directory..."
+                    mkdir -p $HOME/.local/bin
+                    wget -qO $HOME/.local/bin/zip https://github.com/madler/zip/releases/download/v3.0/zip-3.0-bin-linux-x86_64
+                    chmod +x $HOME/.local/bin/zip
+                    export PATH="$HOME/.local/bin:$PATH"
+
                     npm install netlify-cli
                     node_modules/.bin/netlify --version
-                    echo "Deploy to production. Site ID: $NETLIFY_SITE_ID"
                     zip -r build.zip build
                 '''
                 archiveArtifacts artifacts: 'build.zip', fingerprint: true
