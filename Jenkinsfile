@@ -2,51 +2,55 @@ pipeline {
     agent any
 
     stages {
-        stage('build') {
-            agent{
-                docker{
+        stage('Build') {
+            agent {
+                docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
             }
-            steps{
+            steps {
                 sh '''
                 ls -la
                 node --version
                 npm --version
                 npm ci
                 npm run build
-                zip -r build.zip build
                 ls -la
                 '''
             }
         }
-        stage('Test'){
-            agent{
-                docker{
+
+        stage('Test') {
+            agent {
+                docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
             }
-            steps{
+            steps {
                 sh '''
                 test -f build/index.html
                 npm test
                 '''
             }
         }
+
         stage('Deploy') {
-            agent{
-                docker{
+            agent {
+                docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
             }
-            steps{
+            steps {
                 sh '''
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
+                apk add --no-cache zip
+                npm install netlify-cli
+                node_modules/.bin/netlify --version
+                zip -r build.zip build
                 '''
+                archiveArtifacts artifacts: 'build.zip', fingerprint: true
             }
         }
     }
